@@ -2,5 +2,5 @@ venv
 .idea
 mxm_dataset.db
 *.pyc
-.zip
-.csv
+*.zip
+*.csv
