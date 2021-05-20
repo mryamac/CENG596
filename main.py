@@ -1,5 +1,6 @@
 from PreProcess import PreProcess
 from Shhazam import Shhazam
+from StopwordFilter import StopwordFilter
 
 # method = Shhazam()
 # print("start")
@@ -8,4 +9,9 @@ from Shhazam import Shhazam
 
 preprocess = PreProcess("lancaster")
 
-print(preprocess.generate_corpus())
+corpus = preprocess.generate_corpus()
+print(corpus)
+
+filter = StopwordFilter()
+print("AFTER STOP WORD FILTERING")
+print(filter.filter(corpus))
