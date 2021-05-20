@@ -2,6 +2,8 @@ import nltk
 from nltk.stem import PorterStemmer
 from nltk.stem import LancasterStemmer
 
+from StopwordFilter import StopwordFilter
+
 
 class PreProcess:
     def __init__(self, stemmer):
@@ -9,6 +11,10 @@ class PreProcess:
             self.stemmer = LancasterStemmer()
         else:
             self.stemmer = PorterStemmer()
+        self.filter = StopwordFilter()
+        self.filter.set_stop_words(
+            {"a", "an", "and", "as", "at", "be", "by", "for", "from", "has", "he", "in", "is", "it", "its", "of", "on",
+             "that", "the", "to", "was", "were", "will", "with"})
 
     def generate_corpus(self):
         # read doc.. get line .. get lyrics
@@ -26,7 +32,7 @@ class PreProcess:
             "You know there's nothing. More than this. You know there's nothing. "
             "More than this. Tell me one thing. More than this. There's nothing.")
         word_list = self.__apply_stemming__(word_list)
-
+        word_list = self.filter.filter(word_list)
         return word_list
 
     def __apply_stemming__(self, word_list):
