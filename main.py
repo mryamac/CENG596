@@ -1,7 +1,8 @@
 
 
-
 from Shhazam import Shhazam
 
 method = Shhazam()
-print method.apply_query("know you")
+print("start")
+print(method.apply_query("know you and our automobile automatic i"))
+print("finish")

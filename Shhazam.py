@@ -1,4 +1,5 @@
 from Score import Score
+from lyrics_to_bow import lyrics_to_bow
 
 
 # Python program to sort a list of
@@ -22,8 +23,8 @@ class Shhazam:
 
     # return track id
     def apply_query(self, query):
-        word_list = self.__split_query__(query)
-
+        word_list = lyrics_to_bow(query)
+        print(word_list)
         results = Score(10)
         results.feed_and_query(word_list)
         list = Sort_Tuple(results.get_list())
