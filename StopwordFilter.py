@@ -9,9 +9,12 @@ class StopwordFilter:
         self.stop_words = stop_word_list
         return
 
-    def filter(self, word_list):
+    def filter(self, word_map):
 
         for w in self.stop_words:
-            word_list = list(filter((w).__ne__, word_list))
+            word_map = list(filter((w).__ne__, word_map))
 
-        return word_list
+        return word_map
+
+    def filter(self, word):
+        return self.stop_words.__contains__(word)

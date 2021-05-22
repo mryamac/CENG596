@@ -1,4 +1,6 @@
 import nltk
+import csv
+import sqlite3
 from nltk.stem import PorterStemmer
 from nltk.stem import LancasterStemmer
 
@@ -15,30 +17,36 @@ class PreProcess:
         self.filter.set_stop_words(
             {"a", "an", "and", "as", "at", "be", "by", "for", "from", "has", "he", "in", "is", "it", "its", "of", "on",
              "that", "the", "to", "was", "were", "will", "with"})
+        self.con = sqlite3.connect("dataset_v2.db")
 
     def generate_corpus(self):
-        # read doc.. get line .. get lyrics
-        word_list = self.__get_words__(
-            "I could feel at the time. There was no way of knowing. "
-            "Fallen leaves in the night. Who can say where they're blowing. "
-            "As free as the wind. Hopefully learning. Why the sea on the tide. "
-            "Has no way of turning. More than this. You know there's nothing. "
-            "More than this. Tell me one thing. More than this. "
-            "You know there's nothing. It was fun for a while. "
-            "There was no way of knowing. Like a dream in the night. "
-            "Who can say where we're going. No care in the world. Maybe I'm learning. "
-            "Why the sea on the tide. Has no way of turning. More than this. "
-            "You know there's nothing. More than this. Tell me one thing. More than this. "
-            "You know there's nothing. More than this. You know there's nothing. "
-            "More than this. Tell me one thing. More than this. There's nothing.")
-        word_list = self.__apply_stemming__(word_list)
-        word_list = self.filter.filter(word_list)
-        return word_list
+        cur = self.con.cursor()
+        with open("lyrics-data.csv", encoding="utf-8") as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            line_count = 0
+            for row in csv_reader:
+                if row[4] == 'ENGLISH':
+                    line_count += 1
+                    values_to_insert = (line_count, row[0], row[1], row[3])
+                    cur.execute("""
+                        INSERT INTO track_info ('track_id', 'artist', 'track_name', 'lyrics')
+                        VALUES (?, ?, ?, ?)""", values_to_insert)
+                    
+                    self.con.commit()
+                    self.__add_bow__(cur, row[3], line_count)
+                    print(f'Processed {line_count} lines. \tTrack artist: {row[0]} name: {row[1]} {row[2]}')
+            self.con.close()
+        return
 
-    def __apply_stemming__(self, word_list):
-        new_list = []
-        for word in word_list:
-            new_list.append(self.__special_remove__(self.stemmer.stem(word)))
+    def __apply_stemming__(self, word_list, filter):
+        new_list = {}
+        for word in word_list.split():
+            stemmed = self.__special_remove__(self.stemmer.stem(word))
+            if filter.filter(stemmed) == False:
+                value = 0
+                if stemmed in new_list:
+                    value = new_list.get(stemmed)
+                new_list.update({stemmed: (value + 1)})
         return new_list
 
     def __get_words__(self, lyrics):
@@ -65,3 +73,26 @@ class PreProcess:
             word = word.replace(p, '')
 
         return word
+
+    def __add_bow__(self, cur, word_list, row_id):
+        word_map = self.__apply_stemming__(word_list, self.filter)
+        rows = []
+        for w in word_map:
+            cur.execute("""
+                        INSERT INTO track_words ('track_id', 'word', 'count')
+                        VALUES (?, ?, ?);""", (row_id, w, word_map.get(w)))
+
+            cur.execute("""
+                        SELECT term_frequency FROM posting_list WHERE term = ?;""", (w,))
+            
+            result = cur.fetchall()
+            tf = word_map.get(w)
+            if len(result) != 0:
+                tf += result[0][0]
+            
+            cur.execute("""
+                        REPLACE INTO posting_list('term', 'term_frequency')
+                        VALUES (?, ?);""", (w, tf))
+
+        self.con.commit()
+        return
