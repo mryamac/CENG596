@@ -34,17 +34,17 @@ class PreProcess:
                     cur.execute("""
                         INSERT INTO track_info ('track_id', 'artist', 'track_name', 'lyrics')
                         VALUES (?, ?, ?, ?)""", values_to_insert)
-                    
-                    #self.con.commit()
+
+                    # self.con.commit()
                     self.__add_bow__(cur, row[3], line_count)
                     print(f'Processed {line_count} lines. \tTrack artist: {row[0]} name: {row[1]} {row[2]}')
 
-        print("FILL track_words...")    
+        print("FILL track_words...")
         cur.executemany("""
             INSERT INTO track_words ('track_id', 'word', 'count')
             VALUES (?, ?, ?);""", self.track_words_map)
 
-        #self.con.commit()
+        # self.con.commit()
         print("FILL posting_list...")
         dictionary_size = len(self.df_map)
         processed = 0
@@ -52,7 +52,7 @@ class PreProcess:
             cur.execute("""
                         REPLACE INTO posting_list('term', 'doc_frequency', 'term_frequency')
                         VALUES (?, ?, ?);""", (term, self.df_map[term], self.tf_map[term]))
-            #self.con.commit()
+            # self.con.commit()
             processed += 1
             progress = 100 * processed / dictionary_size
             print("POSTING LIST COMPLETION: %.2f" % progress, "%")
@@ -72,8 +72,8 @@ class PreProcess:
                 new_list.update({stemmed: (value + 1)})
         return new_list
 
-    def __get_words__(self, lyrics):
-        return lyrics.split()
+    def get_words(self, text):
+        return self.__apply_stemming__(text, self.filter)
 
     def __special_remove__(self, word):
         # special cases (English...)

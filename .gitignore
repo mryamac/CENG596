@@ -1,6 +1,6 @@
 venv
 .idea
-mxm_dataset.db
+*.db
 *.pyc
 *.zip
 *.csv

@@ -1,5 +1,4 @@
 from Score import Score
-from lyrics_to_bow import lyrics_to_bow
 
 
 # Python program to sort a list of
@@ -15,17 +14,15 @@ def Sort_Tuple(tup):
 
 
 class Shhazam:
-    def __init__(self):
-        pass
+    def __init__(self, number_of_songs):
+        self.k = number_of_songs
 
     def __split_query__(self, query):
         return query.split()
 
     # return track id
     def apply_query(self, query):
-        word_list = lyrics_to_bow(query)
-        print(word_list)
-        results = Score(10)
-        results.feed_and_query(word_list)
-        list = Sort_Tuple(results.get_list())
-        return list[:10]
+        results = Score(self.k)
+        results.feed_and_query(query)
+        rank_list = Sort_Tuple(results.get_list())
+        return rank_list[:self.k]
