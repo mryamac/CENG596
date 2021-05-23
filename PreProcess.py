@@ -29,15 +29,19 @@ class PreProcess:
             line_count = 0
             for row in csv_reader:
                 if row[4] == 'ENGLISH':
-                    line_count += 1
-                    values_to_insert = (line_count, row[0], row[1], row[3])
-                    cur.execute("""
-                        INSERT INTO track_info ('track_id', 'artist', 'track_name', 'lyrics')
-                        VALUES (?, ?, ?, ?)""", values_to_insert)
+                    values_to_insert = (line_count + 1, row[0], row[1], row[3])
 
-                    # self.con.commit()
-                    self.__add_bow__(cur, row[3], line_count)
-                    print(f'Processed {line_count} lines. \tTrack artist: {row[0]} name: {row[1]} {row[2]}')
+                    try:
+                        cur.execute("""
+                            INSERT INTO track_info ('track_id', 'artist', 'track_name', 'lyrics')
+                            VALUES (?, ?, ?, ?)""", values_to_insert)
+
+                        line_count += 1
+                        # self.con.commit()
+                        self.__add_bow__(cur, row[3], line_count)
+                        print(f'Processed {line_count} lines. \tTrack artist: {row[0]} name: {row[1]} {row[2]}')
+                    except:
+                        print(f'*****SKIP DUBLICATE. \tTrack artist: {row[0]} name: {row[1]} {row[2]}')
 
         print("FILL track_words...")
         cur.executemany("""

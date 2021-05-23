@@ -25,7 +25,7 @@ class Score:
     def __get_number_of_terms__(self):
         cur = self.conn.cursor()
         res = 0
-        for row in cur.execute("SELECT count(DISTINCT(track_id)) FROM track_words"):
+        for row in cur.execute("SELECT count(*) FROM track_info;"):
             res = row[0]
         return res
 
