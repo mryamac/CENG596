@@ -1,3 +1,5 @@
+from rank_bm25 import BM25Okapi
+
 from PreProcess import PreProcess
 from Shhazam import Shhazam
 from StopwordFilter import StopwordFilter
@@ -10,13 +12,10 @@ preprocess = PreProcess("lancaster")
 start = datetime.now()
 
 start_time = start.strftime("%H:%M:%S")
-#corpus = preprocess.generate_corpus()
 
-shhazam = Shhazam(10, "lnc.ltc", preprocess)
-result = shhazam.apply_query("Jenny whistle I")
-print(result)
+corpus = preprocess.generate_corpus()
+bm25 = BM25Okapi(corpus)
 
-finish = datetime.now()
-finish_time = finish.strftime("%H:%M:%S")
-print("Start Time =", start_time)
-print("Finish Time =", finish_time)
+query = preprocess.get_words("cant get you out of my head")
+print(bm25.get_top_n(query, corpus, n=10))
+
