@@ -15,11 +15,18 @@ start = datetime.now()
 
 start_time = start.strftime("%H:%M:%S")
 
-corpus = preprocess.generate_corpus()
-bm25 = BM25Okapi(corpus)
+conn = sqlite3.connect('dataset_v3.db')
+
+corpus = preprocess.generate_corpus(conn, False)
+finish = datetime.now()
+
+finish_time = finish.strftime("%H:%M:%S")
+
+print("CORPUS GENERATION\nSTART " + start_time + "\nFINISH: " + finish_time)
+
+bm25 = BM25Okapi(corpus, k1=1.5, b=0.5)
 #"cant get you out of my head"
 
-conn = sqlite3.connect('dataset_v3.db')
 while True:
     # input
     print("Enter a query \n")
@@ -35,6 +42,6 @@ while True:
         cur = conn.cursor()
         res = 0
         for row in cur.execute("SELECT * FROM track_info where track_id =" + str(song[1])):
-            print(row[2])
+            print(row[1] + " - " + row[2])
             print(row[3])
             print("\n")
