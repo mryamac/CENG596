@@ -15,7 +15,7 @@ start = datetime.now()
 
 start_time = start.strftime("%H:%M:%S")
 
-conn = sqlite3.connect('dataset_v3.db')
+conn = sqlite3.connect('dataset_v4.db')
 
 corpus = preprocess.generate_corpus(conn, False)
 finish = datetime.now()
@@ -34,14 +34,25 @@ while True:
     string = str(input())
 
     query = preprocess.get_words(string)
-    scores = bm25.get_scores(query)
+    
+    #scores = bm25.get_scores(query)
+
+    with_bigrams = []
+    for word in query:
+        if '$%$' in word:
+            with_bigrams.append(word)
+    
+    for word in query:
+        with_bigrams.append(word)
+    scores = bm25.get_scores(with_bigrams)
+
     index = list(range(1, len(scores) + 1))
-    result = sorted(zip(scores, index), reverse=True)[:3]
+    result = sorted(zip(scores, index), reverse=True)[:10]
 
     for song in result:
         cur = conn.cursor()
         res = 0
         for row in cur.execute("SELECT * FROM track_info where track_id =" + str(song[1])):
-            print(row[1] + " - " + row[2])
+            print(row[1] + " - " + row[2] + " - " + str(song[0]))
             print(row[3])
             print("\n")

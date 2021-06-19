@@ -87,6 +87,20 @@ class PreProcess:
                 new_list.update({stemmed: (value + 1)})
                 #new_list.append(stemmed)
 
+
+        #bi-gram words
+        prev_word = "";
+        for word in word_list.split():
+            if (prev_word == ""):
+                prev_word = word
+            else:
+                bi_gram = prev_word + "$%$" + word
+                value = 0
+                if bi_gram in new_list:
+                    value = new_list.get(bi_gram)
+                new_list.update({bi_gram: (value + 1)})
+                prev_word = word
+
         return new_list
 
     def get_words(self, text):
