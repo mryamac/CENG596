@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    {% load static %}
+    <link rel="stylesheet"  href="{%  static  'css/bootstrap.min.css'  %}">
+</head>
+<body>
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+          <h5 class="font-weight-light mb-4 font-italic text-white">Underlined search bars with buttons</h5>
+          <div class="bg-white p-5 rounded shadow">
+
+            <!-- Underlined search bars with buttons -->
+
+              <div class="row mb-4">
+                <div class="form-group col-md-9">
+                  <input id="searchText" type="text" placeholder="Write some lyrics to find music" class="form-control form-control-underlined">
+                </div>
+                <div class="form-group col-md-3">
+                  <button class="btn btn-primary rounded-pill btn-block shadow-sm" onclick="getList()">Search</button>
+                </div>
+              </div>
+            <!-- End -->
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    function getList() {
+        $("#ranks tr").remove();
+        $.ajax({
+            type: "POST",
+            url: '{{ 'song-list/' }}',
+            data: { csrfmiddlewaretoken: '{{ csrf_token }}', text: document.getElementById("searchText").value },
+            success: function callback(response){
+                       /* do whatever with the response */
+                        let i;
+                        /* do whatever with the response */
+                        const jsonData = JSON.parse(response);
+                        for (i = 0; i < jsonData.result.length; i++) {
+                                    console.log(jsonData.result[i].name);
+                        }
+
+                        const table = document.getElementById("ranks");
+                        console.log(table)
+                        let tr = table.insertRow(-1);                   // TABLE ROW.
+                        const col = ["Names", "Lyrics"];
+                        for (i = 0; i < col.length; i++) {
+                            const th = document.createElement("th");      // TABLE HEADER.
+                            th.innerHTML = col[i];
+                            tr.appendChild(th);
+                        }
+                        for (i = 0; i < jsonData.result.length; i++) {
+                            tr = table.insertRow(-1);
+                            let tabCell = tr.insertCell(-1);
+                            tabCell.innerHTML = jsonData.result[i].name;
+                            tabCell = tr.insertCell(-1);
+                            tabCell.innerHTML = jsonData.result[i].lyric;
+                        }
+
+                    }
+        });
+    }
+    </script>
+
+    <div class="container mt-7">
+      <!-- Table -->
+      <h2 class="mb-5">Results</h2><div class="row">
+
+        <div class="col">
+          <div class="card shadow">
+            <div class="card-header border-0">
+              <h3 class="mb-0">Top 10 Ranks</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-items-center table-flush" id="ranks">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Lyrics</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>
